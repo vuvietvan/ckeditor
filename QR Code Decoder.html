@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Decoder</title>
+    <style>
+      BODY,
+      TH,
+      TD,
+      INPUT,
+      SELECT,
+      TEXTAREA {
+        font-size: 12px;
+        font-family: Verdana, Arial, sans-serif, 'Times New Roman', Times, serif;
+          } 
+    </style>
+</head>
+<body>
+
+    <textarea id="result" rows="20" cols="160"></textarea>
+    <br />
+    <br />
+    <br />
+    <input accept="image/*" type='file' id="imageInput" />
+    <br /> 
+    <br /> 
+    <img id="blah" src="#" alt="your image"  />
+
+    <script src="jsQR.js"></script>
+    <script>
+        // Function to handle file input change
+        function handleFileInputChange(event) {
+            const fileInput = event.target;
+            
+            // Ensure a file was selected
+            if (fileInput.files.length > 0) {
+                const selectedFile = fileInput.files[0];
+
+                // Create a FileReader to read the contents of the selected file
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    debugger
+                    // Create an image element to hold the selected image
+                    const image = new Image();
+                    image.onload = function () {
+                        // Get the image data from the canvas
+                        const canvas = document.createElement('canvas');
+                        canvas.width = image.width;
+                        canvas.height = image.height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(image, 0, 0);
+                        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+                        // Use jsQR to decode the QR code
+                        const code = jsQR(imageData.data, imageData.width, imageData.height);
+
+                        // Display the result
+                        const resultDiv = document.getElementById('result');
+                        if (code) {
+                            resultDiv.innerHTML = ` ${code.data} `;
+                        } else {
+                            resultDiv.innerHTML = 'No QR Code found in the image.';
+                        }
+
+                        // Lấy thẻ img bằng ID
+                        var myImage = document.getElementById("myImage");
+
+                        // Đặt đường dẫn mới cho thuộc tính src của thẻ img
+                        myImage.src = newImagePath;
+                    };
+
+                    // Set the source of the image to the selected file
+                    image.src = e.target.result;
+                };
+
+                // Read the contents of the selected file as a data URL
+                reader.readAsDataURL(selectedFile);
+            }
+        }
+
+        imageInput.onchange = evt => {
+        const [file] = imageInput.files
+        if (file) {
+            blah.src = URL.createObjectURL(file)
+        }
+        }
+
+        // Attach the handleFileInputChange function to the file input change event
+        const fileInput = document.getElementById('imageInput');
+        fileInput.addEventListener('change', handleFileInputChange);
+    </script>
+</body>
+</html>
